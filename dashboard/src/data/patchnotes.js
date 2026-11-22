@@ -19,7 +19,7 @@ export function localizedVersion(v, lang) {
 export const VERSIONS = [
   {
     version: 'v8.0.0',
-    date: 'à venir',
+    date: '22 novembre 2026',
     title: 'Faire vivre, exploiter, aller plus loin',
     titleEn: 'Bring it to life, run it, go further',
     changes: [
