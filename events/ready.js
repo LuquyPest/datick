@@ -39,6 +39,7 @@ module.exports = {
     } finally {
       client.emit('tenantsMigrated');
     }
+    require('../utils/ecoWatch').syncAllCommands(client).catch(err => logger.warn('Veille OVH', { err: err.message }));
     // Owner still to create (no Discord owner, no owner account): the install link in the logs
     require('../utils/installation').announceIfNeeded(client).catch(() => null);
   },

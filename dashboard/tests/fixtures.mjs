@@ -7,7 +7,13 @@ const ticket = (id, o = {}) => ({ id, owner_id: '2000000000000000' + String(id).
   sla: id % 2 ? { hours: 2, elapsedMinutes: 150, state: 'breached', since: iso(150) } : { hours: 4, elapsedMinutes: 60, state: 'ok', since: iso(60) }, ...o });
 export const days = n => Array.from({ length: n }, (_, i) => ({ date: new Date(now - (n - 1 - i) * 864e5).toISOString().slice(0, 10), count: (i * 7) % 5 + 1 }));
 export const MOCK = {
-  '/api/auth/me': { id: '1', username: 'Daryu', avatar: null, role: 'fondateur', guildId: '1', guildName: 'Sunset FA', permissions: [], isOwner: true, discord: true },
+  '/api/eco-watch': {
+    lastPollAt: iso(1), lastError: null, defaultChannelId: null, canManage: true, maxAlerts: 25, ranges: { kimsufi: 'Kimsufi' },
+    datacenters: [{ code: 'gra', label: '🇫🇷 Gravelines' }],
+    servers: [{ planCode: '24ska01', name: 'KS-A | Intel i7-6700k', range: 'kimsufi', price: 4.99, cpu: 'Intel i7-6700k', memory: '64 Go', available: true, datacenters: [{ datacenter: 'gra', available: true }] }],
+    alerts: [{ id: 1, userId: '1', username: 'Daryu', label: '', planCodes: ['24ska01'], datacenters: ['gra'], maxPrice: 10, channelId: '900000000000000001', enabled: true, notifications: 0 }],
+  },
+  '/api/auth/me': { id: '1', username: 'Daryu', avatar: null, role: 'fondateur', guildId: '1', guildName: 'Sunset FA', permissions: [], isOwner: true, discord: true, ecoWatch: true },
   '/api/instance/info': { name: 'Datick', avatar: null, demo: true, privacyUrl: null, contactEmail: 'contact@example.com', discordLogin: true, providers: [{ id: 'google', label: 'Google' }] },
   '/api/catalog': { services: [{ id: 1, name: 'Demander du matériel', icon: '💻', category: 'Matériel', description: 'Un poste, un écran, un casque…', position: 1, active: true,
     fields: [{ key: 'kind', label: 'Matériel', type: 'select', choices: ['Portable', 'Écran'], required: true, default: '', showIf: null },

@@ -10,6 +10,8 @@ const TZ = 'Europe/Paris';
 const JOBS = {
   'pending-expiry':      { every: 15 * 1000,      run: client => require('../events/messageCreate').runPendingExpiry(client) },
   'ticket-reminders':    { every: 60 * 1000,      run: client => require('./ticketReminders').sendDueReminders(client) },
+  // OVH Eco stock: only reads OVH when a space has turned the watch on
+  'eco-watch':           { discord: true, every: 60 * 1000, run: client => require('./ecoWatch').runEcoWatch(client) },
   'scheduled-messages':  { every: 60 * 1000,      run: client => require('./scheduledMessages').processPending(client) },
   'email-fetch':         { every: 60 * 1000,      run: client => require('./emailTickets').runEmailFetch(client) },
   'escalation-check':    { every: 30 * 60 * 1000, run: client => require('./escalationChecker').runEscalationCheck(client) },

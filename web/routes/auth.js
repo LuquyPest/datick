@@ -76,7 +76,7 @@ router.get('/me', async (req, res) => {
   try {
     const db = getTenantDb(guildId);
     // discord: a Discord server is linked to the space (otherwise the Discord features are hidden)
-    const base = { ...user, guildId, discord: await require('../../utils/spaces').hasDiscord(guildId), idleTimeoutMinutes: await require('../../utils/idleTimeout').idleMinutes(db, guildId) };
+    const base = { ...user, guildId, ecoWatch: (await require('../../utils/ecoWatch').settings(db)).enabled, discord: await require('../../utils/spaces').hasDiscord(guildId), idleTimeoutMinutes: await require('../../utils/idleTimeout').idleMinutes(db, guildId) };
     if (user.role === 'fondateur') {
       return res.json({ ...base, permissions: require('../../utils/gradePermissions').PERMISSIONS });
     }

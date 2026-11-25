@@ -6,7 +6,7 @@ const { foreignChannels, foreignRoles } = require('../../utils/discordGuard');
 const { diffConfig, recordHistory, listHistory, restorePlan } = require('../../utils/configHistory');
 
 const CHANNEL_FIELDS = ['ticketCategoryId', 'waitingCategoryId', 'inProgressCategoryId', 'threadParentChannelId', 'closeLogChannelId', 'claimLogChannelId', 'moveLogChannelId', 'addUserLogChannelId',
-  'removeUserLogChannelId', 'weeklyReportChannelId', 'monthlyReportChannelId', 'spamAlertChannelId', 'escalationAlertChannelId', 'publicStatsChannelId'];
+  'removeUserLogChannelId', 'weeklyReportChannelId', 'monthlyReportChannelId', 'spamAlertChannelId', 'escalationAlertChannelId', 'publicStatsChannelId', 'ecoWatchChannelId'];
 const ROLE_FIELDS = ['supportRoleIds', 'chiefRoleIds'];
 // Never written to the audit log in clear
 // Never written to the history in clear (the logo: too large to keep every version)
@@ -91,6 +91,9 @@ const FIELD_MAP = {
   priorityMatrixEnabled:    'priority_matrix_enabled',
   priorityMatrix:           'priority_matrix',
   calendarId:               'calendar_id',
+  // OVH Eco stock watch (utils/ecoWatch.js)
+  ecoWatchEnabled:          'eco_watch_enabled',
+  ecoWatchChannelId:        'eco_watch_channel_id',
 };
 
 const SNOWFLAKE = v => v === null || v === '' || (typeof v === 'string' && /^\d{17,20}$/.test(v));
@@ -113,6 +116,8 @@ const VALIDATORS = {
   priorityMatrix:           v => v === null || require('../../utils/priorityMatrix').validMatrix(v),
   ticketTypeLabels:         v => !require('../../utils/ticketTypes').labelsProblem(v),
   subjectTypes:             v => !require('../../utils/ticketTypes').subjectTypesProblem(v),
+  ecoWatchEnabled:          v => v === 0 || v === 1 || v === true || v === false,
+  ecoWatchChannelId:        SNOWFLAKE,
   inactiveWarningHours:     v => Number.isInteger(v) && v >= 1 && v <= 720,
   inactiveHours:            v => Number.isInteger(v) && v >= 1 && v <= 720,
   replyRateLimitSeconds:    v => Number.isInteger(v) && v >= 0 && v <= 300,
@@ -377,6 +382,11 @@ async function applyConfigUpdates(req, updates, { source = 'settings', restoredF
   );
   // Another calendar for the space: the deadlines in business hours move (utils/slaPolicies.js)
   if ('calendarId' in updates) await require('../../utils/slaPolicies').refreshOpenTickets(req.guildDb).catch(() => null);
+  // The OVH watch commands appear on the server when it is turned on, and leave when it is off
+  if ('ecoWatchEnabled' in updates) {
+    require('../../utils/ecoWatch').syncCommands(client, req.guildId, !!updates.ecoWatchEnabled)
+      .catch(err => console.error('Veille OVH, commandes :', err.message));
+  }
   return { ok: true, historyId };
 }
 

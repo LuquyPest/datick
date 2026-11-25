@@ -1978,6 +1978,35 @@ const MIGRATIONS = [
     name: 'Registre des traitements RGPD (v8)',
     statements: ['ALTER TABLE guild_config ADD COLUMN IF NOT EXISTS gdpr_register TEXT DEFAULT NULL'],
   },
+  {
+    version: 106,
+    name: 'Veille des stocks OVH Eco',
+    statements: [
+      'ALTER TABLE guild_config ADD COLUMN IF NOT EXISTS eco_watch_enabled TINYINT(1) NOT NULL DEFAULT 0, ADD COLUMN IF NOT EXISTS eco_watch_channel_id VARCHAR(20) DEFAULT NULL',
+      `CREATE TABLE IF NOT EXISTS eco_alerts (
+        id               INT AUTO_INCREMENT PRIMARY KEY,
+        user_id          VARCHAR(20) NOT NULL,
+        username         VARCHAR(100) NOT NULL DEFAULT '',
+        label            VARCHAR(80) NOT NULL DEFAULT '',
+        plan_codes       JSON NOT NULL,
+        datacenters      JSON NOT NULL,
+        max_price        DECIMAL(10,2) DEFAULT NULL,
+        channel_id       VARCHAR(20) NOT NULL,
+        enabled          TINYINT(1) NOT NULL DEFAULT 1,
+        notifications    INT NOT NULL DEFAULT 0,
+        last_notified_at DATETIME DEFAULT NULL,
+        created_at       DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        INDEX idx_eco_alert_user (user_id)
+      )`,
+      `CREATE TABLE IF NOT EXISTS eco_alert_sent (
+        alert_id  INT NOT NULL,
+        plan_code VARCHAR(100) NOT NULL,
+        sent_at   DATETIME NOT NULL,
+        PRIMARY KEY (alert_id, plan_code),
+        CONSTRAINT fk_eco_sent_alert FOREIGN KEY (alert_id) REFERENCES eco_alerts(id) ON DELETE CASCADE
+      )`,
+    ],
+  },
 ];
 
 const LATEST_VERSION = MIGRATIONS[MIGRATIONS.length - 1].version;

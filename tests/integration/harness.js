@@ -9690,6 +9690,48 @@ async function main() {
     await db("UPDATE guild_config SET ticket_retention_mode = 'off', gdpr_register = NULL WHERE id = 1");
   }
 
+  // ── OVH Eco stock watch (utils/ecoWatch.js) ──
+  {
+    const E = app('./utils/ecoWatch');
+    r = await req('GET', '/api/eco-watch', { sid: sessions.F });
+    const cmdsOff = app('./deploy-commands').buildCommands().map(c => c.name);
+    check('veille OVH: désactivée par défaut (API refusée, commandes non enregistrées globalement)', r.status === 403 && !cmdsOff.includes('dispo') && !cmdsOff.includes('alerte'), `${r.status} ${cmdsOff}`);
+    await db('UPDATE guild_config SET eco_watch_enabled = 1 WHERE id = 1');
+    let stock = 'unavailable', price = 499000000;
+    const realSource = { ...E.source };
+    E.source.fetchCatalog = async () => ({ ks: { planCode: 'ks', name: 'KS-A', range: 'kimsufi', price: price / 1e8, cpu: null } });
+    E.source.fetchAvailabilities = async () => [{ fqn: 'ks.ram-64g', planCode: 'ks', memory: 'ram-64g', storage: 'softraid-2x2000sa', datacenters: [{ datacenter: 'gra', availability: stock }] }];
+    await app('./utils/redis').getRedis().del('eco:state', 'eco:snapshot');
+    const first = await E.poll();
+    stock = '1H-low';
+    const second = await E.poll();
+    const third = await E.poll();
+    check('veille OVH: seule une nouvelle disponibilité est annoncée, une fois', first.length === 0 && second.length === 1 && second[0].entries[0].datacenter === 'gra' && third.length === 0, JSON.stringify([first, second, third]));
+    const bad = await req('POST', '/api/eco-watch/alerts', { sid: sessions.F, body: { planCodes: ['inconnu'], channelId: '999999999999999111' } });
+    const foreign = await req('POST', '/api/eco-watch/alerts', { sid: sessions.F, body: { planCodes: ['ks'], channelId: '999999999999999111' } });
+    check('veille OVH: serveur inconnu et salon hors du serveur refusés', bad.status === 400 && foreign.status === 400 && /Salon/.test(foreign.body.error), JSON.stringify([bad.body, foreign.body]));
+    const CH = '999999999999999222';
+    const ins = await db("INSERT INTO eco_alerts (user_id, username, plan_codes, datacenters, max_price, channel_id) VALUES (?, 'a', '[\"ks\"]', '[]', 10, ?)", [U.F, CH]);
+    await db("INSERT INTO eco_alerts (user_id, username, plan_codes, datacenters, max_price, channel_id) VALUES (?, 'b', '[\"ks\"]', '[\"rbx\"]', NULL, ?)", [U.S1, CH]);
+    const posted = [];
+    const client = { channels: { fetch: async id => ({ id, guildId: G, isTextBased: () => true, send: async m => posted.push(m) }) } };
+    const n1 = await E.notifyGuild(client, G, db, second);
+    const n2 = await E.notifyGuild(client, G, db, second);
+    check('veille OVH: mention des seules alertes concernées (datacenter), anti-répétition', n1 === 1 && n2 === 0 && posted.length === 1 && posted[0].content.includes(U.F) && !posted[0].content.includes(U.S1) && JSON.stringify(posted[0].allowedMentions) === JSON.stringify({ users: [U.F] }), JSON.stringify([n1, n2, posted.map(p => p.content)]));
+    const other = await req('DELETE', `/api/eco-watch/alerts/${ins.insertId}`, { sid: sessions.S1 });
+    const mine = await req('GET', '/api/eco-watch', { sid: sessions.S1, query: { all: '1' } });
+    check('veille OVH: un membre du staff ne voit et ne modifie que ses alertes', other.status === 404 && mine.status === 200 && mine.body.alerts.every(a => a.userId === U.S1), JSON.stringify([other.status, mine.body.alerts]));
+    await db('UPDATE guild_config SET eco_watch_enabled = 0 WHERE id = 1');
+    check('veille OVH: désactivée, plus aucun envoi', (await E.notifyGuild(client, G, db, second)) === 0 && posted.length === 1, '');
+    const calls = [];
+    const manager = { fetch: async () => [{ id: 'c1', name: 'dispo' }], create: async (d, g) => calls.push(`+${d.name}:${g}`), delete: async (id, g) => calls.push(`-${id}:${g}`) };
+    await E.syncCommands({ application: { commands: manager } }, G, true);
+    await E.syncCommands({ application: { commands: manager } }, G, false);
+    check('veille OVH: commandes ajoutées au serveur à l activation, retirées à la désactivation', calls.join() === `+dispo:${G},+alerte:${G},-c1:${G}`, calls.join());
+    Object.assign(E.source, realSource);
+    await db('DELETE FROM eco_alerts');
+  }
+
   {
     const pub = ['/api/kb/G/articles/1/feedback', '/api/kb/G/searches', '/api/auth/select-guild', '/api/auth/totp-verify-login', '/api/auth/password-login', '/api/auth/password-reset', '/api/auth/password-reset/confirm',
       '/api/auth/ldap-login', '/api/auth/invitation/accept', '/api/installation/owner', '/api/member/auth/email', '/api/member/auth/email/verify', '/api/member/guilds/G/tickets', '/api/member/tickets/G/1/resolution', '/api/member/tickets/G/1/messages',

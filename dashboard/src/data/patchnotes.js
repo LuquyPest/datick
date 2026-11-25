@@ -18,6 +18,15 @@ export function localizedVersion(v, lang) {
 
 export const VERSIONS = [
   {
+    version: 'v8.1.0',
+    date: 'à venir',
+    title: 'Veille des stocks OVH Eco',
+    titleEn: 'OVH Eco stock watch',
+    changes: [
+      { type: 'new', text: 'Veille des serveurs OVH Eco (Kimsufi, So you Start, Rise), à activer dans Paramètres → Fonctionnalités : une alerte (serveurs, datacenters, prix maximum, salon) mentionne son auteur dès qu\'un serveur est de nouveau en stock ; commandes /dispo et /alerte (en français), présentes seulement sur les serveurs où la veille est activée, et page « Veille OVH » du dashboard', en: 'OVH Eco server watch (Kimsufi, So you Start, Rise), turned on in Settings → Features: an alert (servers, datacenters, maximum price, channel) mentions its author as soon as a server is back in stock; /dispo and /alerte commands (in French), only on the servers where the watch is on, and an « OVH watch » page in the dashboard' },
+    ],
+  },
+  {
     version: 'v8.0.0',
     date: '22 novembre 2026',
     title: 'Faire vivre, exploiter, aller plus loin',
