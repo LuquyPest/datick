@@ -9701,7 +9701,23 @@ async function main() {
     const realSource = { ...E.source };
     E.source.fetchCatalog = async () => ({ ks: { planCode: 'ks', name: 'KS-A', range: 'kimsufi', price: price / 1e8, cpu: null } });
     E.source.fetchAvailabilities = async () => [{ fqn: 'ks.ram-64g', planCode: 'ks', memory: 'ram-64g', storage: 'softraid-2x2000sa', datacenters: [{ datacenter: 'gra', availability: stock }] }];
+    E.source.fetchLinks = async () => ({ 'ks-a': 'https://eco.ovhcloud.com/fr/kimsufi/ks-a/' });
     await app('./utils/redis').getRedis().del('eco:state', 'eco:snapshot');
+    {
+      const O = app('./utils/ecoWatchOvh');
+      const month = (v, mode = 'default', n = 1) => ({ mode, interval: n, intervalUnit: 'month', capacities: ['renew'], price: v, tax: v / 5 });
+      const parsed = O.parseCatalog({
+        products: [{ name: 'p', blobs: { technical: { server: { range: 'kimsufi', cpu: { brand: 'Intel', model: 'X', cores: 4, threads: 8, boost: 4.2 }, services: { sla: 99.9 } } } } },
+          { name: 'mp', blobs: { technical: { memory: { size: 32, ramType: 'DDR4', ecc: true } } } }, { name: 'sp', blobs: { technical: { storage: { raid: 'Soft RAID', disks: [{ number: 2, capacity: 4000, technology: 'HDD', interface: 'SATA' }] } } } }],
+        addons: [{ planCode: 'ram-32g-x', product: 'mp', pricings: [month(200000000)] }, { planCode: 'softraid-2x4000sa-x', product: 'sp', pricings: [month(300000000)] }],
+        plans: [{ planCode: 'x', product: 'p', invoiceName: 'KS-LE-1', pricings: [month(1000000000), month(10800000000, 'upfront12', 12)],
+          addonFamilies: [{ name: 'memory', default: 'ram-32g-x', addons: ['ram-32g-x'] }, { name: 'storage', addons: ['softraid-2x4000sa-x'] }] }],
+      }).x;
+      check('veille OVH: fiche complète lue dans le catalogue (processeur, options, prix, engagement)', parsed.cpu === 'Intel X' && parsed.boost === 4.2 && parsed.sla === 99.9 && parsed.price === 10 && parsed.priceTax === 12 && parsed.price12 === 9 && parsed.memory === '32 Go DDR4 ECC'
+        && parsed.options.storage[0].label === '2×4 To HDD SATA · Soft RAID' && O.rowOption(parsed, 'memory', 'ram-32g').price === 2, JSON.stringify(parsed));
+      const links = O.parseLinks('<a href=https://eco.ovhcloud.com/fr/kimsufi/ks-le-1/ >x</a>');
+      check('veille OVH: page produit officielle liée, sinon la page de la gamme', O.productLink(parsed, links).productPage && O.productLink(parsed, links).url.endsWith('/ks-le-1/') && O.productLink({ name: 'KS-A | i7', range: 'kimsufi' }, links).url === 'https://eco.ovhcloud.com/fr/kimsufi/', '');
+    }
     const first = await E.poll();
     stock = '1H-low';
     const second = await E.poll();

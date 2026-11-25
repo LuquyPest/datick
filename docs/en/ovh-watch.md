@@ -22,7 +22,7 @@ Replies and notifications are in French.
 
 ## Dashboard
 
-The **OVH watch** page shows the stock and lets you create an alert on several servers at once, edit and test it. Everyone manages their own alerts; founders (and the settings permission) see the whole server's. An account linked to Discord is needed to be mentioned. Members outside the staff use the commands.
+The **OVH watch** page shows the stock and, for each server, its full sheet (processor, options, prices with and without VAT and with commitment, price and stock of each configuration) with a link to its page at OVH, or to its range's page when OVH has none for the model. OVH publishes no picture per server: the image is the range's. The page lets you create an alert on several servers at once, edit and test it. Everyone manages their own alerts; founders (and the settings permission) see the whole server's. An account linked to Discord is needed to be mentioned. Members outside the staff use the commands.
 
 ## How it works
 
