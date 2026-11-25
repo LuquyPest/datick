@@ -22,7 +22,7 @@ Les réponses et les notifications sont en français.
 
 ## Dashboard
 
-La page **Veille OVH** montre le stock et permet de créer une alerte pour plusieurs serveurs à la fois, de la modifier et de la tester. Chacun gère ses alertes ; les fondateurs (et la permission de gestion des paramètres) voient celles de tout le serveur. Il faut un compte relié à Discord pour être mentionné. Les membres hors staff passent par les commandes.
+La page **Veille OVH** montre le stock et, pour chaque serveur, sa fiche complète (processeur, options, prix HT, TTC et avec engagement, prix et stock de chaque configuration) avec un lien vers sa page chez OVH, ou vers la page de sa gamme quand OVH n'en a pas pour ce modèle. OVH ne publie pas de photo par serveur : l'image est celle de la gamme. La page permet de créer une alerte pour plusieurs serveurs à la fois, de la modifier et de la tester. Chacun gère ses alertes ; les fondateurs (et la permission de gestion des paramètres) voient celles de tout le serveur. Il faut un compte relié à Discord pour être mentionné. Les membres hors staff passent par les commandes.
 
 ## Fonctionnement
 

@@ -3,7 +3,7 @@
 const express = require('express');
 const router = express.Router();
 const E = require('../../utils/ecoWatch');
-const { dcLabel, RANGE_LABELS } = require('../../utils/ecoWatchOvh');
+const { dcLabel, RANGE_LABELS, rangeImage } = require('../../utils/ecoWatchOvh');
 const { fetchGuildChannel } = require('../../utils/discordGuard');
 
 const canManage = req => req.userIsFondateur || !!req.userPermissions?.has('manage_settings');
@@ -25,6 +25,13 @@ router.get('/', async (req, res, next) => {
       alerts, defaultChannelId: cfg.channelId, canManage: canManage(req), maxAlerts: E.MAX_ALERTS_PER_USER,
     });
   } catch (err) { next(err); }
+});
+
+// The range illustrations of eco.ovhcloud.com, relayed: the site needs a cookie the browser would not keep
+router.get('/images/:range', async (req, res) => {
+  const image = await rangeImage(req.params.range).catch(() => null);
+  if (!image) return res.status(404).json({ error: 'Image indisponible' });
+  res.set('Cache-Control', 'private, max-age=86400').type('png').send(image);
 });
 
 router.post('/alerts', async (req, res, next) => {

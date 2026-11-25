@@ -5,13 +5,12 @@ import toast from 'react-hot-toast';
 import { useAuth } from '../App';
 import { confirmToast } from '../utils/confirmToast';
 import { fmtDate } from '../utils/format';
+import EcoServerCard, { price, shortName } from '../components/EcoServerCard';
 
 const FIELD = 'w-full bg-surface border border-overlay/8 text-ink-1 placeholder-ink-4 rounded-lg px-3 py-2 text-sm focus:outline-hidden focus:border-primary transition-colors';
 const BTN = 'px-3 py-1.5 rounded-lg border border-overlay/8 text-xs text-ink-2 hover:text-ink-1';
 const CARD = 'bg-surface-card border border-overlay/6 rounded-2xl p-4 sm:p-5 space-y-3';
 const EMPTY = { planCodes: [], datacenters: [], maxPrice: '', label: '', channelId: '' };
-const price = p => (p === null || p === undefined ? '—' : `${p.toFixed(2).replace('.', ',')} €`);
-const shortName = s => s.name.split('|')[0].trim();
 const toggle = (list, v) => (list.includes(v) ? list.filter(x => x !== v) : [...list, v]);
 
 // OVH Eco stock watch: live stock, and alerts that mention their author on Discord
@@ -34,7 +33,7 @@ export default function EcoWatch() {
   useEffect(() => {
     if (!user?.ecoWatch) return undefined;
     load();
-    const timer = setInterval(load, 30000);
+    const timer = setInterval(load, 60000);
     return () => clearInterval(timer);
   }, [all, user?.ecoWatch]);
   useEffect(() => { api.get('/discord/channels').then(r => setChannels(r.data)).catch(() => {}); }, []);
@@ -46,6 +45,7 @@ export default function EcoWatch() {
       && words.every(w => `${s.name} ${s.planCode} ${s.cpu || ''} ${s.memory || ''}`.toLowerCase().includes(w)));
   }, [servers, search, range, onlyAvailable]);
   const nameOf = plan => { const s = servers.find(x => x.planCode === plan); return s ? shortName(s) : plan; };
+  const dcLabel = code => data?.datacenters.find(d => d.code === code)?.label || code.toUpperCase();
   const channelName = id => { const c = channels.find(x => x.id === id); return c ? `#${c.name}` : id; };
 
   const reset = () => { setForm(EMPTY); setEditing(null); };
@@ -79,15 +79,15 @@ export default function EcoWatch() {
   }
 
   return (
-    <div className="p-4 sm:p-6 space-y-5 max-w-6xl">
+    <div className="p-4 sm:p-6 space-y-5 max-w-[100rem]">
       <div>
         <h1 className="text-xl font-bold text-ink-1">Veille OVH Eco</h1>
         <p className="text-xs text-ink-4">{data?.lastPollAt ? <>Dernière vérification : <span translate="no">{fmtDate(data.lastPollAt)}</span></> : 'Première vérification en cours (une par minute).'}</p>
         {(error || data?.lastError) && <p role="alert" className="text-xs text-red-400 mt-1">{error || data.lastError}</p>}
       </div>
 
-      <div className="grid lg:grid-cols-5 gap-5 items-start">
-        <section className={`${CARD} lg:col-span-3`}>
+      <div className="grid xl:grid-cols-3 gap-5 items-start">
+        <section className="xl:col-span-2 space-y-3 min-w-0">
           <h2 className="text-sm font-semibold text-ink-2">Serveurs</h2>
           <div className="flex flex-wrap gap-2">
             <input value={search} onChange={e => setSearch(e.target.value)} aria-label="Rechercher un serveur" placeholder="Rechercher un serveur" className={`${FIELD} flex-1 min-w-40`} />
@@ -99,28 +99,16 @@ export default function EcoWatch() {
               <input type="checkbox" checked={onlyAvailable} onChange={e => setOnlyAvailable(e.target.checked)} /> Disponibles seulement
             </label>
           </div>
-          <ul className="divide-y divide-overlay/6 max-h-[60vh] overflow-y-auto">
+          <ul className="space-y-3">
             {shown.map(s => (
-              <li key={s.planCode}>
-                <label className="flex gap-3 py-2.5 cursor-pointer">
-                  <input type="checkbox" className="mt-1" checked={form.planCodes.includes(s.planCode)} onChange={() => setForm(f => ({ ...f, planCodes: toggle(f.planCodes, s.planCode) }))} />
-                  <span className="min-w-0 flex-1">
-                    <span className="flex flex-wrap items-center gap-2">
-                      <span className="text-sm text-ink-1 font-medium" translate="no">{shortName(s)}</span>
-                      {s.available && <span className="px-1.5 rounded bg-emerald-500/15 text-emerald-400 text-[10px] font-bold">En stock</span>}
-                    </span>
-                    <span className="block text-xs text-ink-4" translate="no">{[s.cpu || s.name.split('|')[1]?.trim(), s.memory].filter(Boolean).join(' · ')}</span>
-                    <span className="block text-[11px] text-emerald-400" translate="no">{s.datacenters.filter(d => d.available).map(d => d.datacenter.toUpperCase()).join(' · ')}</span>
-                  </span>
-                  <span className="text-sm text-ink-2 tabular-nums whitespace-nowrap" translate="no">{price(s.price)}</span>
-                </label>
-              </li>
+              <EcoServerCard key={s.planCode} server={s} range={data.ranges?.[s.range] || s.range} dcLabel={dcLabel}
+                selected={form.planCodes.includes(s.planCode)} onSelect={() => setForm(f => ({ ...f, planCodes: toggle(f.planCodes, s.planCode) }))} />
             ))}
           </ul>
           {data && !shown.length && <p className="text-sm text-ink-4">Aucun serveur à afficher.</p>}
         </section>
 
-        <div className="lg:col-span-2 space-y-5">
+        <div className="space-y-5">
           <section className={CARD}>
             <h2 className="text-sm font-semibold text-ink-2">{editing ? 'Modifier l\'alerte' : 'Nouvelle alerte'}</h2>
             {!form.planCodes.length && <p className="text-xs text-ink-4">Coche un ou plusieurs serveurs dans la liste.</p>}

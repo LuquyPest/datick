@@ -179,7 +179,7 @@ for (const { run: theme, theme: colorTheme, viewport, mobile, lang, skin } of RU
   if (lang === 'en') {
     const EN = [
       ['settings', '/settings', ['Settings', 'Ticket prefix'], ['Préfixe des tickets']],
-      ['veille-ovh', '/veille-ovh', ['New alert', 'In stock only', 'Pause'], ['Nouvelle alerte', 'Disponibles seulement', 'Mettre en pause']],
+      ['veille-ovh', '/veille-ovh', ['New alert', 'In stock only', 'Pause', 'Order on OVH', 'Full sheet', 'Watch this server'], ['Nouvelle alerte', 'Disponibles seulement', 'Mettre en pause', 'Surveiller ce serveur']],
       ['tickets', '/tickets', ['ticket(s) found', 'Save the view'], ['Enregistrer la vue']],
       // the pinned note is staff writing: it stays as written
       ['ticket', '/tickets/1', ['Reply', 'Note interne : vérifier Stripe'], ['Répondre']],

@@ -10,7 +10,9 @@ export const MOCK = {
   '/api/eco-watch': {
     lastPollAt: iso(1), lastError: null, defaultChannelId: null, canManage: true, maxAlerts: 25, ranges: { kimsufi: 'Kimsufi' },
     datacenters: [{ code: 'gra', label: '🇫🇷 Gravelines' }],
-    servers: [{ planCode: '24ska01', name: 'KS-A | Intel i7-6700k', range: 'kimsufi', price: 4.99, cpu: 'Intel i7-6700k', memory: '64 Go', available: true, datacenters: [{ datacenter: 'gra', available: true }] }],
+    servers: [{ planCode: '24ska01', name: 'KS-A | Intel i7-6700k', range: 'kimsufi', price: 4.99, cpu: 'Intel i7-6700k', memory: '64 Go', available: true, priceTax: 5.99, setup: 4.99, price12: 4.74, price24: 4.49, cores: 4, threads: 8, frequency: 4, boost: 4.2, cpuScore: 8000, frame: 'OVH 1U', dualPower: false, sla: 99.9, antiDdos: 'standard', releaseYear: '2024', usages: ['gaming'], url: 'https://eco.ovhcloud.com/fr/kimsufi/ks-le-1/', productPage: true,
+      options: { memory: [{ code: 'm', label: '64 Go DDR4 2133 MHz non ECC', price: 0, default: true }], storage: [{ code: 's', label: '2×480 Go SSD SATA · Soft RAID', price: 0, default: true }] },
+      variants: [{ memoryLabel: '64 Go DDR4', storageLabel: '2×480 Go SSD', price: 4.99, datacenters: [{ datacenter: 'gra', availability: '1H-low', available: true }] }], datacenters: [{ datacenter: 'gra', available: true }] }],
     alerts: [{ id: 1, userId: '1', username: 'Daryu', label: '', planCodes: ['24ska01'], datacenters: ['gra'], maxPrice: 10, channelId: '900000000000000001', enabled: true, notifications: 0 }],
   },
   '/api/auth/me': { id: '1', username: 'Daryu', avatar: null, role: 'fondateur', guildId: '1', guildName: 'Sunset FA', permissions: [], isOwner: true, discord: true, ecoWatch: true },

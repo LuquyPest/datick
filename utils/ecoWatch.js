@@ -22,7 +22,7 @@ const CHANNEL_TYPES = [ChannelType.GuildText, ChannelType.GuildAnnouncement];
 const SNOWFLAKE = /^\d{17,20}$/;
 
 // Replaced by the tests
-const source = { fetchCatalog: ovh.fetchCatalog, fetchAvailabilities: ovh.fetchAvailabilities };
+const source = { fetchCatalog: ovh.fetchCatalog, fetchAvailabilities: ovh.fetchAvailabilities, fetchLinks: ovh.fetchLinks };
 let catalog = { at: 0, plans: null };
 
 async function settings(db) {
@@ -44,7 +44,15 @@ function build(rows, plans) {
   for (const row of rows) {
     if (!servers.has(row.planCode)) servers.set(row.planCode, { ...plans[row.planCode], available: false, datacenters: {}, variants: [] });
     const server = servers.get(row.planCode);
-    const variant = { memory: row.memory, storage: row.storage, datacenters: [] };
+    const plan = plans[row.planCode];
+    const memory = ovh.rowOption(plan, 'memory', row.memory);
+    const storage = ovh.rowOption(plan, 'storage', row.storage);
+    const variant = {
+      memory: row.memory, storage: row.storage, datacenters: [],
+      memoryLabel: memory?.label || ovh.prettyMemory(row.memory), storageLabel: storage?.label || ovh.prettyStorage(row.storage),
+      // Monthly price of this configuration: the plan plus what its memory and disks add
+      price: memory && storage && plan.price !== null ? Math.round((plan.price + memory.price + storage.price) * 100) / 100 : null,
+    };
     for (const dc of row.datacenters || []) {
       dcs.add(dc.datacenter);
       const ok = ovh.isAvailable(dc.availability);
@@ -68,7 +76,13 @@ async function poll() {
   const redis = getRedis();
   try {
     if (!catalog.plans || Date.now() - catalog.at > CATALOG_TTL) {
-      try { catalog = { at: Date.now(), plans: await source.fetchCatalog() }; } catch (err) { if (!catalog.plans) throw err; }
+      try {
+        const plans = await source.fetchCatalog();
+        // The product links come from the website: without it, the range pages are linked
+        const links = await source.fetchLinks().catch(err => { logger.warn('Veille OVH : pages produit illisibles', { err: err.message }); return {}; });
+        for (const plan of Object.values(plans)) Object.assign(plan, ovh.productLink(plan, links));
+        catalog = { at: Date.now(), plans };
+      } catch (err) { if (!catalog.plans) throw err; }
     }
     const rows = (await source.fetchAvailabilities()).filter(r => Object.hasOwn(catalog.plans, r.planCode));
     if (!rows.length) throw new Error('Aucune disponibilité pour les serveurs Eco (réponse ignorée)');
@@ -199,13 +213,14 @@ function availabilityEmbed(server, entries) {
     configs += (configs ? '\n\n' : '') + line;
   }
   const specs = [server.cpu, server.cores && `${server.cores}c/${server.threads ?? server.cores}t`, server.memory].filter(Boolean).join(' · ');
-  return new EmbedBuilder().setColor(0x22c55e).setTitle(cut(`🟢 ${server.name} est disponible !`, 256)).setURL(ovh.ECO_URL)
+  return new EmbedBuilder().setColor(0x22c55e).setTitle(cut(`🟢 ${server.name} est disponible !`, 256)).setURL(server.url || ovh.ECO_URL)
     .setDescription(specs || null)
     .addFields(
       { name: 'Gamme', value: ovh.RANGE_LABELS[server.range] || server.range, inline: true },
       { name: 'Prix', value: priceLabel(server), inline: true },
       { name: 'Code', value: `\`${server.planCode}\``, inline: true },
       { name: 'Configurations disponibles', value: cut(configs || '—', 1024) },
+      { name: 'Commander', value: `[Voir sur OVHcloud](${server.url || ovh.ECO_URL})` },
     )
     .setFooter({ text: 'Commande sur eco.ovhcloud.com — premier arrivé, premier servi !' }).setTimestamp(new Date());
 }

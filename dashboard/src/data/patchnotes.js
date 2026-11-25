@@ -23,6 +23,7 @@ export const VERSIONS = [
     title: 'Veille des stocks OVH Eco',
     titleEn: 'OVH Eco stock watch',
     changes: [
+      { type: 'impr', text: 'Page « Veille OVH » : fiche complète de chaque serveur (processeur, options de mémoire, de disques et de réseau, prix HT, TTC et avec engagement, prix et stock de chaque configuration), illustration de la gamme et lien vers sa page chez OVH', en: '« OVH watch » page: full sheet of each server (processor, memory, disk and network options, prices with and without VAT and with commitment, price and stock of each configuration), illustration of the range and link to its page at OVH' },
       { type: 'new', text: 'Veille des serveurs OVH Eco (Kimsufi, So you Start, Rise), à activer dans Paramètres → Fonctionnalités : une alerte (serveurs, datacenters, prix maximum, salon) mentionne son auteur dès qu\'un serveur est de nouveau en stock ; commandes /dispo et /alerte (en français), présentes seulement sur les serveurs où la veille est activée, et page « Veille OVH » du dashboard', en: 'OVH Eco server watch (Kimsufi, So you Start, Rise), turned on in Settings → Features: an alert (servers, datacenters, maximum price, channel) mentions its author as soon as a server is back in stock; /dispo and /alerte commands (in French), only on the servers where the watch is on, and an « OVH watch » page in the dashboard' },
     ],
   },
