@@ -62,8 +62,9 @@ async function collect(db, userId) {
   const [profileRow] = await db('SELECT labels FROM member_profiles WHERE member_id = ?', [userId]).catch(() => []);
   // Contact card of this identity (utils/contacts.js): name, address and notes kept by the staff
   const [contact] = await db('SELECT c.display_name, c.email, c.notes, c.created_at FROM contact_identities ci JOIN contacts c ON c.id = ci.contact_id WHERE ci.value = ?', [userId]).catch(() => []);
+  const ecoAlerts = await db('SELECT * FROM eco_alerts WHERE user_id = ?', [userId]).catch(() => []);
   const { openTranscript } = require('../../utils/transcriptCrypto');
-  return { tickets, notes, ratings, transcripts: transcripts.map(t => ({ ...t, txt: openTranscript(t.txt) })), participations, otherMessages, blacklist, journal, staffNotes, labels: profileRow?.labels || null, contact: contact || null };
+  return { tickets, notes, ratings, transcripts: transcripts.map(t => ({ ...t, txt: openTranscript(t.txt) })), participations, otherMessages, blacklist, journal, staffNotes, labels: profileRow?.labels || null, contact: contact || null, ecoAlerts };
 }
 
 // GET /api/members/:userId — what the server holds about this member
@@ -128,6 +129,7 @@ router.delete('/:userId', async (req, res) => {
       counts.quarantined = (await db('DELETE FROM email_quarantine WHERE from_address = ?', [address]).catch(() => ({ affectedRows: 0 }))).affectedRows;
     }
   }
+  await db('DELETE FROM eco_alerts WHERE user_id = ?', [userId]).catch(() => null);
   await db('DELETE FROM survey_requests WHERE owner_id = ?', [userId]).catch(() => null);
   await db('DELETE FROM blacklist WHERE user_id = ?', [userId]);
   // Staff notes and labels about the member (profile)

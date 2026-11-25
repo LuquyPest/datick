@@ -12,7 +12,8 @@ function buildCommands() {
 
   for (const file of files) {
     const command = require(path.join(commandsPath, file));
-    if (command?.data) {
+    // Commands of an optional feature are registered per server when it is turned on (utils/ecoWatch.js)
+    if (command?.data && !command.feature) {
       // Staff commands need a tenant DB: guild only (0 = Guild). Member commands (dm: true): DM with the bot (1 = BotDM)
       commands.push({ ...localizeCommand(command.data.toJSON()), contexts: command.dm ? [1] : [0], integration_types: [0] });
     }

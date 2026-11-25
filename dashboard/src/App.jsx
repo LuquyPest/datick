@@ -55,6 +55,7 @@ const Panels      = lazy(() => import('./pages/Panels'));
 const Forms       = lazy(() => import('./pages/Forms'));
 const MemberPortal = lazy(() => import('./pages/MemberPortal'));
 const Activity    = lazy(() => import('./pages/Activity'));
+const EcoWatch    = lazy(() => import('./pages/EcoWatch'));
 const Incidents   = lazy(() => import('./pages/Incidents'));
 const ApiDocs     = lazy(() => import('./pages/ApiDocs'));
 const Procedures  = lazy(() => import('./pages/Procedures'));
@@ -297,6 +298,7 @@ export default function App() {
                         <Route path="changements/:id" element={<ErrorBoundary><Changes /></ErrorBoundary>} />
                         <Route path="procedures" element={<RequireRole role="fondateur" perm="manage_settings"><ErrorBoundary><Procedures /></ErrorBoundary></RequireRole>} />
                         <Route path="incidents"  element={<RequireRole role="fondateur" perm="manage_settings"><ErrorBoundary><Incidents /></ErrorBoundary></RequireRole>} />
+                        <Route path="veille-ovh" element={<RequireDiscord><ErrorBoundary><EcoWatch /></ErrorBoundary></RequireDiscord>} />
                         <Route path="fields"     element={
                           <RequireRole role="fondateur" perm="manage_settings"><ErrorBoundary><Fields /></ErrorBoundary></RequireRole>
                         } />

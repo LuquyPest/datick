@@ -132,6 +132,7 @@ const PAGES = [
   ['faq', '/faq', 'Base de connaissances publique'],
   ['faq-arborescence', '/faq', 'Suivi du colis'],
   ['boite', '/boite', 'Non pris'],
+  ['veille-ovh', '/veille-ovh', 'KS-A'],
   ['faq-retours', '/faq', 'Il manque le lien vers le transporteur'],
   ['aide-avis', '/aide/123456789012345678/3', 'Cet article t\'a-t-il aidé ?', true],
 ];
@@ -178,6 +179,7 @@ for (const { run: theme, theme: colorTheme, viewport, mobile, lang, skin } of RU
   if (lang === 'en') {
     const EN = [
       ['settings', '/settings', ['Settings', 'Ticket prefix'], ['Préfixe des tickets']],
+      ['veille-ovh', '/veille-ovh', ['New alert', 'In stock only', 'Pause'], ['Nouvelle alerte', 'Disponibles seulement', 'Mettre en pause']],
       ['tickets', '/tickets', ['ticket(s) found', 'Save the view'], ['Enregistrer la vue']],
       // the pinned note is staff writing: it stays as written
       ['ticket', '/tickets/1', ['Reply', 'Note interne : vérifier Stripe'], ['Répondre']],

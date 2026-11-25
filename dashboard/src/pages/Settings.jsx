@@ -213,7 +213,7 @@ function TabList({ tabs: TABS, current, onChange }) {
 }
 
 export default function Settings() {
-  const { user } = useAuth();
+  const { user, setUser } = useAuth();
   const [cfg, setCfg]               = useState(null);
   const [loading, setLoading]       = useState(true);
   const [saving, setSaving]         = useState(false);
@@ -323,6 +323,8 @@ export default function Settings() {
         idleTimeoutMinutes:       cfg.idleTimeoutMinutes ?? 0,
         memberReopenDays:         cfg.memberReopenDays ?? 7,
         notifyMemberStage:        cfg.notifyMemberStage ? 1 : 0,
+        ecoWatchEnabled:          cfg.ecoWatchEnabled ? 1 : 0,
+        ecoWatchChannelId:        cfg.ecoWatchChannelId || null,
         memberPortalEnabled:      cfg.memberPortalEnabled === undefined || cfg.memberPortalEnabled ? 1 : 0,
         portalEmailOpen:          cfg.portalEmailOpen ? 1 : 0,
         portalLogo:               cfg.portalLogo || null,
@@ -385,6 +387,7 @@ export default function Settings() {
         apiKeysEnabled:           cfg.apiKeysEnabled ? 1 : 0,
       });
       toast.success('Configuration sauvegardée !');
+      setUser(u => ({ ...u, ecoWatch: !!cfg.ecoWatchEnabled })); // menu entry
       setSavedJson(JSON.stringify(cfg));
       setHistoryKey(k => k + 1);
     } catch (err) {
@@ -900,6 +903,17 @@ export default function Settings() {
           </label>
           <PortalBranding cfg={cfg} set={set} />
         </FeatureToggle>
+        {discord && (
+          <FeatureToggle
+            label="Veille des stocks OVH Eco"
+            hint="Mentionne les membres sur Discord quand un serveur OVH Eco (Kimsufi, So you Start, Rise) qu'ils attendent est de nouveau en stock : commandes /dispo et /alerte sur le serveur, page « Veille OVH » du dashboard"
+            checked={!!cfg.ecoWatchEnabled} onChange={v => set('ecoWatchEnabled', v)}
+          >
+            <Field label="Salon par défaut des alertes" hint="Utilisé quand l'auteur d'une alerte ne choisit pas de salon">
+              <ChannelPicker value={cfg.ecoWatchChannelId} onChange={v => set('ecoWatchChannelId', v)} channels={channels} loading={discordLoading} />
+            </Field>
+          </FeatureToggle>
+        )}
         <FeatureToggle
           label="Rappels staff automatiques"
           hint="DM au staff claimer si aucune réponse dans le délai configuré"

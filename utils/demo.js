@@ -15,6 +15,7 @@ const BLOCKED = [
   ['*', '/api/config/import'], ['*', '/api/members'], ['*', '/api/push'], ['*', '/api/profile'], ['*', '/api/sessions'],
   ['*', '/api/auth/select-guild'], ['*', '/api/tickets/open'], ['*', '/api/config/public-stats/publish'], ['*', '/api/bot-import'], ['*', '/api/email'],
   // v4: an e-mail to any address (invitations), a public page on this domain (knowledge base), a public form (widget)
+  ['*', '/api/eco-watch'], // posts and mentions on Discord
   ['*', '/api/invitations'], ['*', '/api/faq/public'], ['*', '/api/widget-settings'],
   // v5.2 and v7: Slack/Teams, CRM, trackers, extensions (manifest and webhooks), monitoring addresses, backups (v8)
   ['*', '/api/chat'], ['*', '/api/crm'], ['*', '/api/dev-integrations'], ['*', '/api/extensions'], ['*', '/api/monitoring-sources'], ['*', '/api/space-backup'], ['*', '/api/signatures'],
@@ -23,7 +24,7 @@ const BLOCKED = [
 // sendToMember); the voice channel would be created on Discord
 // Approvals: asking by e-mail sends free text to any address (the staff approver is fictitious anyway)
 const BLOCKED_RE = [/^\/api\/tickets\/\d+\/participants(\/|$)/, /^\/api\/tickets\/\d+\/voice$/, /^\/api\/tickets\/\d+\/approvals(\/|$)/, /^\/api\/tickets\/\d+\/cc(\/|$)/];
-const BLOCKED_CONFIG_FIELDS = ['webhookUrl', 'webhookSecret', 'webhooksEnabled', 'webhookEvents', 'ipAllowlist', 'require2fa', 'apiKeysEnabled', 'idleTimeoutMinutes'];
+const BLOCKED_CONFIG_FIELDS = ['webhookUrl', 'webhookSecret', 'webhooksEnabled', 'webhookEvents', 'ipAllowlist', 'require2fa', 'apiKeysEnabled', 'idleTimeoutMinutes', 'ecoWatchEnabled'];
 
 const isDemoSession = session => !!session?.user?.demo;
 

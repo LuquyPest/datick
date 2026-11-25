@@ -5,7 +5,7 @@ import { Rocket, Gavel,
   LayoutDashboard, Ticket, Users, ShieldBan,
   FileText, Settings, LogOut, Bot, ScrollText, Shield, ClipboardList,
   Kanban, Tag, BarChart2, Menu, X, Command, Sun, Moon,
-  Search, TrendingUp, Key, Mail, History, LayoutTemplate, ClipboardCheck, Clock, HelpCircle, UserSearch, ListTodo, ListPlus, Gauge, Megaphone, ListChecks, Contact, KeyRound, HeartPulse, UserCog, ChevronRight, Server, Building2, CalendarDays, Coins, Bug, GitPullRequestArrow, Layers, Inbox } from 'lucide-react';
+  Search, TrendingUp, Key, Mail, History, LayoutTemplate, ClipboardCheck, Clock, HelpCircle, UserSearch, ListTodo, ListPlus, Gauge, Megaphone, ListChecks, Contact, KeyRound, HeartPulse, UserCog, ChevronRight, Server, Radar, Building2, CalendarDays, Coins, Bug, GitPullRequestArrow, Layers, Inbox } from 'lucide-react';
 import { useAuth } from '../App';
 import { useInstanceInfo } from '../hooks/useInstanceInfo';
 import { useSSECtx } from '../context/SSEContext';
@@ -34,6 +34,7 @@ const NAV_GROUPS = [
     { to: '/comite',      label: 'Comité des changements', icon: Gavel, roles: ['support','fondateur'] },
     { to: '/mises-en-production', label: 'Mises en production', icon: Rocket, roles: ['support','fondateur'] },
     { to: '/parc',        label: 'Parc',         icon: Server,          roles: ['support','fondateur'] },
+    { to: '/veille-ovh',  label: 'Veille OVH',   icon: Radar,           roles: ['support','fondateur'], discord: true, feature: 'ecoWatch' },
     { to: '/search',      label: 'Recherche',    icon: Search,          roles: ['support','fondateur'] },
     { to: '/profils',     label: 'Contacts',      icon: Contact,         roles: ['support','fondateur'] },
     { to: '/organisations', label: 'Organisations', icon: Building2,     roles: ['support','fondateur'] },
@@ -122,6 +123,7 @@ export default function Sidebar() {
     if (item.owner) return !!user?.isOwner;
     // Discord features: hidden in a space without a linked Discord server
     if (item.discord && user?.discord === false) return false;
+    if (item.feature && !user?.[item.feature]) return false; // optional feature of the space
     const role = user?.role;
     if (item.perm) return role === 'fondateur' || user?.permissions?.includes(item.perm);
     return item.roles.includes(role);
